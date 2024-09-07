@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { GetProp, TableProps } from 'antd';
-import { Table } from 'antd';
+import { Table, Flex, Button } from 'antd';
 import type { SorterResult } from 'antd/es/table/interface';
+import AlunoForm from '../AlunosForm';
+import { IAlunoData } from '../../entities';
+import { genericNotification } from '@/app/domain/shared/components/notification/genericNotification';
 
 type ColumnsType<T extends object = object> = TableProps<T>['columns'];
 type TablePaginationConfig = Exclude<GetProp<TableProps, 'pagination'>, boolean>;
@@ -11,11 +14,9 @@ interface DataType {
         first: string;
         last: string;
     };
-    gender: string;
-    email: string;
-    login: {
-        uuid: string;
-    };
+    birthDate: Date;
+    username: string;
+    id: number
 }
 
 interface TableParams {
@@ -29,33 +30,22 @@ const columns: ColumnsType<DataType> = [
     {
         title: 'Nome',
         dataIndex: 'name',
-        sorter: true,
-        render: (name) => `${name.first} ${name.last}`,
-        width: '20%',
+        width: '40%',
     },
     {
         title: 'Data de nascimento',
         dataIndex: 'birth_date',
-        filters: [
-            { text: 'Male', value: 'male' },
-            { text: 'Female', value: 'female' },
-        ],
-        width: '20%',
+        width: '25%',
     },
     {
         title: 'Usuário',
         dataIndex: 'username',
-    },
+        width: '20%',
+    }
 ];
 
-const getRandomuserParams = (params: TableParams) => ({
-    results: params.pagination?.pageSize,
-    page: params.pagination?.current,
-    ...params,
-});
-
 const AlunosList: React.FC = () => {
-    const [data, setData] = useState<DataType[]>();
+    const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [tableParams, setTableParams] = useState<TableParams>({
         pagination: {
@@ -65,24 +55,36 @@ const AlunosList: React.FC = () => {
         },
     });
 
-    const fetchData = () => {
+    const fetchData = useCallback(async () => {
         setLoading(true);
-        fetch(`https://randomuser.me/api?${getRandomuserParams(tableParams)}`)
-            .then((res) => res.json())
-            .then(({ results }) => {
-                setData(results);
+        try {
+            const response = await fetch(`http://localhost/alunos?page=${tableParams.pagination.current}`);
+            const result = await response.json();
+
+            console.log('Dados recebidos:', result);
+
+            if (result && result.data) {
+                setData(result.data);
                 setLoading(false);
-                // const plural = results.data.length !== 1 ? "s" : "";
+
+                const plural = result.data.length !== 1 ? "s" : "";
                 setTableParams({
                     ...tableParams,
                     pagination: {
                         ...tableParams.pagination,
-                        // total: results.total,
-                        // showTotal: (total) => `${total} resultado${plural} encontrado${plural}`,
+                        total: result.total,
+                        showTotal: (total) => `${total} resultado${plural} encontrado${plural}`,
                     },
                 });
-            });
-    };
+            } else {
+                console.error('Dados não encontrados na resposta:', result);
+                setLoading(false);
+            }
+        } catch (error) {
+            console.error('Erro ao buscar dados:', error);
+            setLoading(false);
+        }
+    }, [tableParams.pagination]);
 
     useEffect(() => {
         fetchData();
@@ -108,15 +110,76 @@ const AlunosList: React.FC = () => {
         }
     };
 
+    const [isOpen, setIsOpen] = useState(false);
+    const [editingAluno, setEditingAluno] =
+        useState<IAlunoData | null>(null);
+
+    const handleEdit = (aluno: IAlunoData) => {
+        console.log("Editing aluno:", aluno);
+        setEditingAluno(aluno);
+        setIsOpen(true);
+    };
+
+    async function handleDelete(id: number) {
+        try {
+            const response = await fetch(`http://localhost/alunos/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+    
+            if (!response.ok) {
+                throw new Error(`Erro ao deletar aluno: ${response.statusText}`);
+            }
+            genericNotification({
+                message: "Aluno excluído com sucesso",
+                type: "success",
+            });
+        } catch (error) {
+            console.error('Erro na exclusão do aluno:', error);
+            genericNotification({
+                message: "Falha ao excluir aluno",
+                type: "error",
+            });
+        }
+    }
+
     return (
-        <Table
-            columns={columns}
-            rowKey={(record) => record.login.uuid}
-            dataSource={data}
-            pagination={tableParams.pagination}
-            loading={loading}
-            onChange={handleTableChange}
-        />
+        <>
+            <Table
+                rowKey={(record) => record.id}
+                dataSource={data}
+                pagination={tableParams.pagination}
+                loading={loading}
+                onChange={handleTableChange}
+                columns={[
+                    ...columns,
+                    {
+                        render: (text, record) => (
+                            <Flex>
+                                <Button onClick={() => handleEdit(record)} type="link">
+                                    Editar
+                                </Button>
+                                <Button
+                                    onClick={() => handleDelete(record.id)}
+                                    type="link"
+                                >
+                                    Excluir
+                                </Button>
+                            </Flex>
+                        ),
+                    },
+                ]}
+            />
+            <AlunoForm
+                isOpen={isOpen}
+                onClose={() => {
+                    setIsOpen(false);
+                }}
+                alunoData={editingAluno}
+            />
+        </>
     );
 };
 

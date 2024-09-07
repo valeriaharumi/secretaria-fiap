@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { Layout } from "antd";
+import { Content } from "antd/es/layout/layout";
+import SideBar from "./domain/shared/components/SideBar";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -28,7 +31,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <Layout className="h-screen">
+          <SideBar/>
+          <Content style={{ overflow: "auto" }}>
+            {children}
+          </Content>
+        </Layout>
       </body>
     </html>
   );
