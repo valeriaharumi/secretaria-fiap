@@ -52,17 +52,7 @@ const MainMenu = (): JSX.Element => {
     return (
         <Sider className="h-screen">
             <div className="h-full flex-1 flex flex-col">
-                <Flex
-                    className="items-center px-3 py-5"
-                >
-                    <Image
-                        src="/assets/light_full_logo.svg"
-                        preview={false}
-                        alt=""
-                        className="h-12 w-40"
-                    />
-                </Flex>
-                <div className="flex-grow">
+                <div className="flex-grow mt-8">
                     <Menu
                         selectedKeys={[selectedKey]}
                         onClick={handleMenuClick}

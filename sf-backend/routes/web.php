@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AlunoController;
 use App\Http\Controllers\TurmaController;
+use App\Http\Controllers\MatriculaController;
 
 Route::post('login', [AuthController::class, 'login']);
 
@@ -19,4 +20,7 @@ Route::post('login', [AuthController::class, 'login']);
     Route::get('turmas/{id}', [TurmaController::class, 'findOne']);
     Route::put('turmas/{id}', [TurmaController::class, 'update']);
     Route::delete('turmas/{id}', [TurmaController::class, 'delete']);
+
+    Route::post('matriculas', [MatriculaController::class, 'create']);
+    Route::get('matriculas', [MatriculaController::class, 'index']);
 // });
