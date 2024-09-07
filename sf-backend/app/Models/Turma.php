@@ -9,10 +9,15 @@ class Turma extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'type'];
+    protected $fillable = ['name', 'description', 'type', 'code'];
 
     public function alunos()
     {
         return $this->belongsToMany(Aluno::class, 'matriculas');
+    }
+    
+    public function tipo()
+    {
+        return $this->belongsTo(Tipo::class);
     }
 }

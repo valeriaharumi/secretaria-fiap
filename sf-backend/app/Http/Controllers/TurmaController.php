@@ -12,7 +12,9 @@ class TurmaController extends Controller
         $limit  = 5;
         $page = $request->input('page', 1);
 
-        $turmas = Turma::orderBy('name', 'asc')->paginate($limit, ['*'], 'page', $page);
+        $turmas = Turma::with('tipo')
+            ->orderBy('name', 'asc')
+            ->paginate($limit, ['*'], 'page', $page);
 
         return response()->json([
             'data' => $turmas->items(),

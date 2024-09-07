@@ -13,6 +13,7 @@ interface DataType {
     name: string;
     description: string;
     code: string;
+    type: number;
     id: number
 }
 
@@ -27,7 +28,7 @@ const columns: ColumnsType<DataType> = [
     {
         title: 'Nome',
         dataIndex: 'name',
-        width: '35%',
+        width: '30%',
     },
     {
         title: 'Descrição',
@@ -37,7 +38,15 @@ const columns: ColumnsType<DataType> = [
     {
         title: 'Código',
         dataIndex: 'code',
+        width: '10%',
+    },
+    {
+        title: 'Tipo',
+        dataIndex: 'tipo',
         width: '15%',
+        render: (tipo) => {
+            return (tipo.name)
+        }
     }
 ];
 
@@ -125,7 +134,7 @@ const TurmasList: React.FC = () => {
                     'Content-Type': 'application/json',
                 },
             });
-    
+
             if (!response.ok) {
                 throw new Error(`Erro ao excluir turma: ${response.statusText}`);
             }

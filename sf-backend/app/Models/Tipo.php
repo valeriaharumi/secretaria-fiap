@@ -10,4 +10,9 @@ class Tipo extends Model
     use HasFactory;
 
     protected $fillable = ['name'];
+
+    public function turmas()
+    {
+        return $this->hasMany(Turma::class);
+    }
 }
