@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('description');
+            $table->string('code', 2)->unique();
             $table->foreignId('tipo_id')->constrained('tipos');
             $table->timestamps();
         });

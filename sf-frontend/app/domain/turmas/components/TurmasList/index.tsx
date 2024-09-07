@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import type { GetProp, TableProps } from 'antd';
 import { Table, Flex, Button } from 'antd';
 import type { SorterResult } from 'antd/es/table/interface';
-import AlunoForm from '../AlunosForm';
-import { IAlunoData } from '../../entities';
+import TurmasForm from '../TurmasForm';
+import { ITurmaData } from '../../entities';
 import { genericNotification } from '@/app/domain/shared/components/notification/genericNotification';
 
 type ColumnsType<T extends object = object> = TableProps<T>['columns'];
@@ -11,8 +11,8 @@ type TablePaginationConfig = Exclude<GetProp<TableProps, 'pagination'>, boolean>
 
 interface DataType {
     name: string;
-    birthDate: Date;
-    username: string;
+    description: string;
+    code: string;
     id: number
 }
 
@@ -27,21 +27,21 @@ const columns: ColumnsType<DataType> = [
     {
         title: 'Nome',
         dataIndex: 'name',
-        width: '40%',
+        width: '35%',
     },
     {
-        title: 'Data de nascimento',
-        dataIndex: 'birth_date',
-        width: '25%',
+        title: 'Descrição',
+        dataIndex: 'description',
+        width: '35%',
     },
     {
-        title: 'Usuário',
-        dataIndex: 'username',
-        width: '20%',
+        title: 'Código',
+        dataIndex: 'code',
+        width: '15%',
     }
 ];
 
-const AlunosList: React.FC = () => {
+const TurmasList: React.FC = () => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [tableParams, setTableParams] = useState<TableParams>({
@@ -55,7 +55,7 @@ const AlunosList: React.FC = () => {
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await fetch(`http://localhost/alunos?page=${tableParams.pagination.current}`);
+            const response = await fetch(`http://localhost/turmas?page=${tableParams.pagination.current}`);
             const result = await response.json();
 
             console.log('Dados recebidos:', result);
@@ -108,18 +108,18 @@ const AlunosList: React.FC = () => {
     };
 
     const [isOpen, setIsOpen] = useState(false);
-    const [editingAluno, setEditingAluno] =
+    const [editingTurma, setEditingTurma] =
         useState<IAlunoData | null>(null);
 
-    const handleEdit = (aluno: IAlunoData) => {
-        console.log("Editing aluno:", aluno);
-        setEditingAluno(aluno);
+    const handleEdit = (turma: ITurmaData) => {
+        console.log("Editing turma:", turma);
+        setEditingTurma(turma);
         setIsOpen(true);
     };
 
     async function handleDelete(id: number) {
         try {
-            const response = await fetch(`http://localhost/alunos/${id}`, {
+            const response = await fetch(`http://localhost/turmas/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -127,16 +127,16 @@ const AlunosList: React.FC = () => {
             });
     
             if (!response.ok) {
-                throw new Error(`Erro ao deletar aluno: ${response.statusText}`);
+                throw new Error(`Erro ao excluir turma: ${response.statusText}`);
             }
             genericNotification({
-                message: "Aluno excluído com sucesso",
+                message: "Turma excluída com sucesso",
                 type: "success",
             });
         } catch (error) {
-            console.error('Erro na exclusão do aluno:', error);
+            console.error('Erro na exclusão da turma:', error);
             genericNotification({
-                message: "Falha ao excluir aluno",
+                message: "Falha ao excluir turma",
                 type: "error",
             });
         }
@@ -169,15 +169,15 @@ const AlunosList: React.FC = () => {
                     },
                 ]}
             />
-            <AlunoForm
+            <TurmasForm
                 isOpen={isOpen}
                 onClose={() => {
                     setIsOpen(false);
                 }}
-                alunoData={editingAluno}
+                turmaData={editingTurma}
             />
         </>
     );
 };
 
-export default AlunosList;
+export default TurmasList;
