@@ -6,10 +6,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use Laravel\Sanctum\PersonalAccessToken;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -43,5 +46,19 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function generateToken($name)
+    {
+        // Criação do token e armazenamento no banco de dados
+        $token = PersonalAccessToken::create([
+            'tokenable_type' => static::class,
+            'tokenable_id' => $this->id,
+            'name' => $name,
+            'token' => hash('sha256', Str::random(64)),
+            'abilities' => json_encode([]),
+        ]);
+
+        return $token;
     }
 }
